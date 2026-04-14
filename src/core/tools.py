@@ -97,15 +97,16 @@ def list_recipes(restaurant_id: str) -> str:
 
 @tool
 def audit_recipe_escandallo(restaurant_id: str, recipe_name: str) -> str:
-    """Audit a specific recipe's escandallo (cost breakdown) for the
+    """Get a specific recipe's escandallo (cost breakdown) for the
     given restaurant.  Cross-references each ingredient's quantity and
-    unit against the ingredient catalog to flag anomalies such as:
+    unit against the ingredient catalog and returns a raw data dump.
 
+    The LLM should analyze this raw data to flag anomalies such as:
     - Unit mismatches (e.g. Liters vs Milliliters)
     - Suspiciously high or low quantities
     - Conversion rate errors in the ingredient catalog
 
-    Returns a detailed JSON audit report."""
+    Returns a detailed JSON breakdown."""
     # Find the recipe
     recipe = None
     for r in mock_database["recipes"]:
@@ -135,7 +136,6 @@ def audit_recipe_escandallo(restaurant_id: str, recipe_name: str) -> str:
 
     audit_lines = []
     total_computed_cost_cents = 0
-    anomalies_found = []
 
     for item in recipe["ingredients_used"]:
         ing_id = item["ingredient_id"]
@@ -148,77 +148,28 @@ def audit_recipe_escandallo(restaurant_id: str, recipe_name: str) -> str:
             cost = qty * catalog_entry["average_cost_per_recipe_unit_cents"]
             total_computed_cost_cents += cost
 
-            anomaly = None
-
-            # Check 1: Unit mismatch
-            if unit != catalog_entry["recipe_unit"]:
-                anomaly = (
-                    f"UNIT MISMATCH: recipe says '{qty} {unit}' but the "
-                    f"ingredient catalog's recipe_unit is "
-                    f"'{catalog_entry['recipe_unit']}'. "
-                    f"If the user meant {qty} {catalog_entry['recipe_unit']} "
-                    f"instead of {qty} {unit}, the cost would change "
-                    f"significantly."
-                )
-                anomalies_found.append(anomaly)
-
-            # Check 2: Conversion rate sanity
-            if (
-                catalog_entry["purchase_unit"] != catalog_entry["recipe_unit"]
-                and catalog_entry["conversion_rate"] == 1
-            ):
-                conv_anomaly = (
-                    f"CONVERSION RATE ERROR: purchase_unit="
-                    f"'{catalog_entry['purchase_unit']}', recipe_unit="
-                    f"'{catalog_entry['recipe_unit']}', but conversion_rate=1. "
-                    f"This is likely wrong — e.g. 1 KG = 1000 Grams, not 1."
-                )
-                anomalies_found.append(conv_anomaly)
-                if anomaly:
-                    anomaly += f"  ALSO: {conv_anomaly}"
-                else:
-                    anomaly = conv_anomaly
-
-            # Check 3: Suspiciously high quantity
-            if qty >= 100 and unit in ("Milliliters", "Grams"):
-                qty_note = (
-                    f"QUANTITY CHECK: {qty} {unit} seems high for a single "
-                    f"serving of '{catalog_entry['name']}'. "
-                    f"Verify if this should be {qty / 100} {unit} instead."
-                )
-                # Only flag if it's actually suspicious (e.g. 500ml of truffle oil)
-                if cost > 500:  # more than €5 for a single ingredient
-                    anomalies_found.append(qty_note)
-                    if anomaly:
-                        anomaly += f"  ALSO: {qty_note}"
-                    else:
-                        anomaly = qty_note
-
             audit_lines.append(
                 {
                     "ingredient_id": ing_id,
                     "name": catalog_entry["name"],
-                    "quantity": qty,
+                    "quantity_in_recipe": qty,
                     "unit_in_recipe": unit,
                     "catalog_recipe_unit": catalog_entry["recipe_unit"],
                     "catalog_purchase_unit": catalog_entry["purchase_unit"],
                     "catalog_conversion_rate": catalog_entry["conversion_rate"],
                     "computed_cost_cents": cost,
-                    "anomaly": anomaly,
                 }
             )
         else:
             audit_lines.append(
                 {
                     "ingredient_id": ing_id,
-                    "quantity": qty,
+                    "quantity_in_recipe": qty,
                     "unit_in_recipe": unit,
-                    "catalog_recipe_unit": "N/A (not in catalog)",
+                    "catalog_error": "N/A (not in catalog)",
                     "computed_cost_cents": "unknown",
-                    "anomaly": f"Ingredient {ing_id} not found in catalog.",
                 }
             )
-            anomalies_found.append(f"Ingredient {ing_id} not in catalog.")
 
     result = {
         "recipe_name": recipe["name"],
@@ -227,7 +178,6 @@ def audit_recipe_escandallo(restaurant_id: str, recipe_name: str) -> str:
         "recorded_cost_cents": recipe["current_cost_cents"],
         "computed_cost_cents": total_computed_cost_cents,
         "line_items_audit": audit_lines,
-        "anomalies": anomalies_found,
     }
     return json.dumps(result, ensure_ascii=False)
 

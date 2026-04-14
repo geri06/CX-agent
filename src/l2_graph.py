@@ -33,6 +33,7 @@ from src.nodes.l2 import (
     l2_draft_node,
     l2_critic_node,
     l2_hitl_node,
+    l2_escalate_node,
 )
 
 logger = logging.getLogger(__name__)
@@ -137,6 +138,22 @@ def route_after_l2_hitl(
     return "__end__"
 
 
+def route_after_extract_findings(
+    state: L2AgentState,
+) -> Literal["l2_draft_node", "l2_escalate_node"]:
+    """
+    Route based on the contents of the investigation.
+    If the Reasoner decided it cannot solve the problem, it flags 'ESCALATE_TO_HUMAN'.
+    """
+    context = state.get("investigation_context", "")
+    if "ESCALATE_TO_HUMAN" in context:
+        logger.warning(
+            "L2 Reasoner triggered ESCALATE_TO_HUMAN — routing to manual escalation."
+        )
+        return "l2_escalate_node"
+    return "l2_draft_node"
+
+
 # ──────────────────────────────────────────────────────────────
 # Graph construction
 # ──────────────────────────────────────────────────────────────
@@ -157,6 +174,7 @@ def build_l2_graph() -> StateGraph:
     builder.add_node("l2_draft_node", l2_draft_node)
     builder.add_node("l2_critic_node", l2_critic_node)
     builder.add_node("l2_hitl_node", l2_hitl_node)
+    builder.add_node("l2_escalate_node", l2_escalate_node)
 
     # ── Edges ───────────────────────────────────────────────
 

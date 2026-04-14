@@ -106,6 +106,14 @@ SCENARIOS = {
             "it costs €45 to make a single burger. Something is wrong."
         ),
     },
+    7: {
+        "name": "L2 — Laura: Escalation (No bug found)",
+        "user_name": "Laura García",
+        "user_email": "laura@pescadosdelaura.com",
+        "user_query": (
+            "Hola, he estado revisando mis costes en Pescados de Laura y mi plato 'Salmón al Horno' marca que tiene un 80% de food cost. ¿Esto es un error del sistema?"
+        ),
+    },
 }
 
 

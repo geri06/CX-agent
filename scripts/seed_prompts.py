@@ -215,11 +215,11 @@ PROMPTS = [
                     "- EXPLICIT MATH VERIFICATION: Whenever you perform a calculation (like computing total cost from cents or converting cents to euros), write out the formula explicitly and check your zeroes (e.g., '100g * 50 cents/g = 5000 cents -> 50.00 Euros').\n"
                     "- Do NOT stop after finding one issue — there may be multiple root causes.\n"
                     "- Do NOT make up data. Only report findings from actual tool results.\n"
+                    "- ESCALATION: If the data shows no anomalies, perfectly matches the customer's claim, or you simply cannot solve the problem conceptually, DO NOT hallucinate a fix. Output `ESCALATE_TO_HUMAN: <reason>` as your final summary.\n"
                     "- When you have identified ALL root causes, provide a comprehensive FINAL SUMMARY with:\n"
                     "  • Each issue found\n"
                     "  • The exact data point causing the problem\n"
                     "  • The likely user error (data-entry typo, wrong unit selected, wrong category, etc.)\n"
-                    "  • The specific corrective action the user should take in the platform"
                 ),
             },
         ],
@@ -237,10 +237,11 @@ PROMPTS = [
                     "Guidelines:\n"
                     "- Address each issue the customer raised.\n"
                     "- Explain the root cause found in simple, business-friendly terms so the restaurant owner understands why the error happened.\n"
-                    "- Tell the customer that our system team is fixing the data on their behalf and it will be updated in a few moments.\n"
+                    "- Tell the customer that our system team is fixing the data on their behalf and it will be updated in a few moments ONLY if there is something to fix.\n"
                     "- DOUBLE-CHECK ALL MATH: Re-verify all your cent-to-euro conversions (e.g. 500 cents is €5.00, NOT €0.05). Ensure the numbers make logical sense.\n"
                     "- DO NOT give the user step-by-step instructions to fix it themselves.\n"
                     "- DO NOT use any internal system IDs (like 'ing_gamba_01', 'recipe_id') or technical JSON keys (like 'recorded_cost_cents'). Translate everything into plain language (e.g. 'your Red Prawn ingredient', 'the cost shown in your app').\n"
+                    "- Avoid using numbers if it's not necessary. Give a clear explanation with only the necessary number in order to make the costumer understand what is happening"
                     "- Sound like a real human. No AI clichés.\n"
                     "- ALWAYS start the email with 'Dear {{user_name}},' followed by a brief thank you for reaching out.\n"
                     "- DO NOT be overly empathetic or apologetic. Be professional and solution-oriented.\n"

@@ -48,7 +48,8 @@ def get_langfuse_handler(**kwargs) -> CallbackHandler:
 # 3.  LLM — ChatGroq (llama-3.3-70b-versatile)
 # ──────────────────────────────────────────────────────────────
 llm = ChatGroq(
-    model="openai/gpt-oss-120b",
+    #model="openai/gpt-oss-120b",
+    model="openai/gpt-oss-20b",
     temperature=0,
     api_key=os.environ["GROQ_API_KEY"],
 )

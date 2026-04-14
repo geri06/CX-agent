@@ -37,6 +37,14 @@ Scenario 3 — "Burger House Carlos" (rest_310)
     2. Recipe "Smash Burger" lists 500 mL of truffle oil for a single
        burger (should be 5 mL — 100× over-count).
 ═══════════════════════════════════════════════════════════════
+Scenario 7 — "Pescados de Laura" (rest_400)
+───────────────────────────────────────────────────────────────
+  Customer complaint : "My Salmón al Horno is showing a food cost of 80%!"
+  Planted errors:
+    NONE. The data is entirely correct. The salmon is simply very expensive
+    and she is selling it too cheap.
+    EXPECTED OUTCOME: Agent should fail to find a data bug and Escalate.
+═══════════════════════════════════════════════════════════════
 """
 
 mock_database: dict = {
@@ -80,6 +88,19 @@ mock_database: dict = {
             "integrations": {"pos": "Glovo POS", "accounting": None},
             "metrics_summary": {
                 "current_food_cost_pct": 55.0,
+                "target_food_cost_pct": 30.0,
+            },
+        },
+        # ── Scenario 7 (Escalation) ────────────────────────
+        {
+            "restaurant_id": "rest_400",
+            "email": "laura@pescadosdelaura.com",
+            "name": "Pescados de Laura",
+            "plan": "Pro",
+            "status": "Active",
+            "integrations": {"pos": "Square", "accounting": "Holded"},
+            "metrics_summary": {
+                "current_food_cost_pct": 80.0,
                 "target_food_cost_pct": 30.0,
             },
         },
@@ -170,6 +191,25 @@ mock_database: dict = {
                     "quantity": 4,
                     "unit_price_cents": 24000,
                     "mapped_ingredient_id": "ing_cerveza_01",
+                },
+            ],
+        },
+        # ── Laura ───────────────────────────────────────────
+        {
+            "invoice_id": "inv_40011",
+            "restaurant_id": "rest_400",
+            "document_type": "invoice",
+            "supplier": "Pescados del Norte",
+            "issue_date": "2026-04-12",
+            "total_amount_cents": 50000,
+            "status": "processed",
+            "line_items": [
+                {
+                    "line_id": "line_1",
+                    "raw_text": "SALMON NORUEGO ENTERO 20KG",
+                    "quantity": 1,
+                    "unit_price_cents": 50000,
+                    "mapped_ingredient_id": "ing_salmon_01",
                 },
             ],
         },
@@ -284,6 +324,18 @@ mock_database: dict = {
             "conversion_rate": 1,
             "average_cost_per_recipe_unit_cents": 35.0,
         },
+
+        # ── Laura (rest_400) ────────────────────────────────
+        {
+            "ingredient_id": "ing_salmon_01",
+            "restaurant_id": "rest_400",
+            "name": "Salmón Noruego Entero",
+            "category": "food",
+            "purchase_unit": "Kilograms",
+            "recipe_unit": "Grams",
+            "conversion_rate": 1000,
+            "average_cost_per_recipe_unit_cents": 2.5,  # 25€/KG is correct
+        },
     ],
 
     # ──────────────────────────────────────────────────────
@@ -328,6 +380,18 @@ mock_database: dict = {
                 {"ingredient_id": "ing_carne_smash_01", "quantity": 150, "unit": "Grams"},
                 {"ingredient_id": "ing_pan_brioche_01", "quantity": 1, "unit": "Units"},
                 {"ingredient_id": "ing_truffle_oil_01", "quantity": 500, "unit": "Milliliters"},  # ← BUG: should be 5 mL
+            ],
+        },
+
+        # ── Laura (rest_400) - PERFECT DATA, HIGH COST ──────
+        {
+            "recipe_id": "rec_salmon_01",
+            "restaurant_id": "rest_400",
+            "name": "Salmón al Horno",
+            "sale_price_cents": 625,   # €6.25 (Very cheap for salmon!)
+            "current_cost_cents": 500, # €5.00 (200g * 2.5 cents/g)
+            "ingredients_used": [
+                {"ingredient_id": "ing_salmon_01", "quantity": 200, "unit": "Grams"},
             ],
         },
     ],
