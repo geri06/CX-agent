@@ -1,0 +1,16 @@
+[project]
+name = "haddock-cx-agent"
+version = "0.1.0"
+description = "Haddock CX AI Agent — Level 1 Queries Workflow (CRAG/Self-RAG)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.4",
+    "langchain>=0.3",
+    "langchain-core>=0.3",
+    "langchain-groq>=0.3",
+    "langchain-text-splitters>=0.3",
+    "langfuse>=3.0",
+    "python-dotenv>=1.1",
+    "chromadb>=1.0",
+]
