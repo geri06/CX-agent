@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ── Design Tokens — OpenAI-inspired Light Theme ──────── */
+@theme {
+  --color-bg-primary: #ffffff;
+  --color-bg-surface: #f7f7f8;
+  --color-bg-elevated: #ececf1;
+  --color-bg-inspector: #f7f7f8;
+  --color-border: #e5e5e5;
+  --color-border-subtle: #f0f0f0;
+  --color-text-primary: #0d0d0d;
+  --color-text-secondary: #4a4a4a;
+  --color-text-tertiary: #8e8ea0;
+  --color-accent: #10a37f;
+  --color-accent-hover: #0d8a6a;
+  --color-accent-glow: rgba(16, 163, 127, 0.15);
+  --color-success: #10a37f;
+  --color-success-muted: rgba(16, 163, 127, 0.1);
+  --color-danger: #ef4146;
+  --color-danger-muted: rgba(239, 65, 70, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-muted: rgba(245, 158, 11, 0.1);
+  --color-blue: #2563eb;
+  --color-blue-muted: rgba(37, 99, 235, 0.08);
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ── Global Reset ──────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Scrollbar Styling ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* ── Utility Classes ───────────────────────────────────── */
+.glass-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.glass-card-hoverable {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card-hoverable:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-glow), 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.badge-accent {
+  background: var(--color-accent-glow);
+  color: var(--color-accent);
+}
+
+.badge-success {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.badge-danger {
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.badge-warning {
+  background: var(--color-warning-muted);
+  color: #b45309;
+}
+
+.badge-blue {
+  background: var(--color-blue-muted);
+  color: var(--color-blue);
+}
+
+.badge-neutral {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Pulsing glow animation ────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px var(--color-accent), 0 0 12px var(--color-accent-glow);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 8px var(--color-accent), 0 0 24px var(--color-accent-glow);
+    transform: scale(1.15);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Code block styling (Inspector panel — light theme) ── */
+.code-block {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text-primary);
+}
+
+.syntax-key { color: #0550ae; }
+.syntax-string { color: #0a3069; }
+.syntax-number { color: #953800; }
+.syntax-boolean { color: #cf222e; }
+.syntax-null { color: #8b949e; }
+.syntax-bracket { color: #6e7781; }
+.syntax-colon { color: #6e7781; }

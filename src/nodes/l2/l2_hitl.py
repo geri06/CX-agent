@@ -39,18 +39,27 @@ def l2_hitl_node(state: L2AgentState) -> dict:
     print(state.get("draft_email"))
     print("═" * 80)
 
-    while True:
-        review_input = input("\nApprove this draft? (y/n): ").strip().lower()
-        if review_input in ["y", "yes", "n", "no"]:
-            break
-        print("Please enter 'y' to approve or 'n' to request revision.")
+    # Check if a decision was injected by the API (via update_state)
+    pre_decision = state.get("hitl_decision")
+    if pre_decision in ["approve", "request_revision"]:
+        decision = pre_decision
+        human_feedback = state.get("hitl_feedback", "")
+    else:
+        while True:
+            review_input = input("\nApprove this draft? (y/n): ").strip().lower()
+            if review_input in ["y", "yes", "n", "no"]:
+                break
+            print("Please enter 'y' to approve or 'n' to request revision.")
 
-    decision = "approve" if review_input in ["y", "yes"] else "request_revision"
+        decision = "approve" if review_input in ["y", "yes"] else "request_revision"
+        
+        if decision == "request_revision":
+            human_feedback = input("\nEnter feedback to improve the draft: ").strip()
+        else:
+            human_feedback = ""
 
     # ── Path A: Request revision ────────────────────────────
     if decision == "request_revision":
-        human_feedback = input("\nEnter feedback to improve the draft: ").strip()
-
         previous_feedback = state.get("feedback", "")
         if previous_feedback:
             combined_feedback = (

@@ -238,7 +238,10 @@ def build_l2_graph() -> StateGraph:
     )
 
     # ── Compile ─────────────────────────────────────────────
-    graph = builder.compile()
-    logger.info("✅  L2 Data Detective graph compiled successfully")
+    from langgraph.checkpoint.memory import MemorySaver
+    memory = MemorySaver()
+    
+    graph = builder.compile(checkpointer=memory, interrupt_before=["l2_hitl_node"])
+    logger.info("✅  L2 Data Detective graph compiled successfully with MemorySaver")
 
     return graph

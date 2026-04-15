@@ -236,7 +236,10 @@ def build_graph() -> StateGraph:
     builder.add_edge("escalate_node", END)
 
     # ── Compile ─────────────────────────────────────────────
-    graph = builder.compile()
-    logger.info("✅  CX Agent graph compiled successfully")
+    from langgraph.checkpoint.memory import MemorySaver
+    memory = MemorySaver()
+
+    graph = builder.compile(checkpointer=memory, interrupt_before=["hitl_node"])
+    logger.info("✅  CX Agent graph compiled successfully with MemorySaver")
 
     return graph
