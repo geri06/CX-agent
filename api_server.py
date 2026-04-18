@@ -258,6 +258,13 @@ async def _stream_l1(request: AgentRequest, thread_id: str, langfuse_handler, is
                 "status": "in_progress",
             }, as_node="hitl_node")
 
+            # Persist human feedback to the CX manual & re-ingest ChromaDB
+            from src.utils.feedback_logger import append_feedback_to_manual
+            append_feedback_to_manual(
+                user_query=request.user_query,
+                human_feedback=feedback_text,
+            )
+
         resume_json = json.dumps({
             'node_id': '__resume__', 'label': 'Resuming Agent',
             'type': 'system', 'status': 'completed',

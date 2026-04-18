@@ -24,7 +24,7 @@ from src.retrieval.vectorstore import ingest_chunks, reset_collection  # noqa: E
 # ──────────────────────────────────────────────────────────────
 # Configuration
 # ──────────────────────────────────────────────────────────────
-MANUAL_PATH = PROJECT_ROOT / "data" / "cx_manual.md"
+MANUAL_PATH = PROJECT_ROOT / "data" / "cx_manualv1.md"
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 150
 

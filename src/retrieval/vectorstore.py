@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CHROMA_PERSIST_DIR = str(_PROJECT_ROOT / "data" / "chroma_db")
 COLLECTION_NAME = "cx_manual"
-DEFAULT_N_RESULTS = 1
+DEFAULT_N_RESULTS = 4
 
 
 # ──────────────────────────────────────────────────────────────

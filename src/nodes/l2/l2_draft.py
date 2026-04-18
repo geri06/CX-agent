@@ -30,19 +30,18 @@ HUMAN_REVISION_PROMPT = ChatPromptTemplate.from_messages([
         "requested specific changes to a previously drafted email.\n\n"
         "CRITICAL RULES:\n"
         "1. Take the CURRENT DRAFT below as your base.\n"
-        "2. Apply ONLY the changes the human reviewer requested.\n"
-        "3. Do NOT remove, rephrase, or restructure any part of the email "
-        "that the human did NOT mention.\n"
-        "4. Do NOT add new information beyond what the human asked for.\n"
-        "5. Keep the exact same structure, tone, greeting, and sign-off "
-        "unless the human explicitly asked to change them.\n"
-        "6. Output ONLY the revised email body. No explanations."
+        "2. Incorporate the human reviewer's requested changes into the draft.\n"
+        "3. Identify any parts of the previously drafted email that are incompatible or incoherent "
+        "with the human feedback, and modify them to ensure the final email is completely coherent.\n"
+        "4. Preserve the overall structure, tone, greeting, and sign-off "
+        "wherever possible, adjusting only what is necessary for flow and consistency.\n"
+        "5. Output ONLY the revised email body. No explanations."
     ),
     (
         "user",
         "CURRENT DRAFT:\n{current_draft}\n\n"
         "HUMAN FEEDBACK:\n{human_feedback}\n\n"
-        "Apply the human's changes to the draft above and output the "
+        "Apply the human's changes to the draft above, resolving any inconsistencies, and output the "
         "revised email."
     ),
 ])

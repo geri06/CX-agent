@@ -194,6 +194,31 @@ mock_database: dict = {
                 },
             ],
         },
+        {
+            "invoice_id": "inv_77502",
+            "restaurant_id": "rest_310",
+            "document_type": "invoice",
+            "supplier": "Congelados y Salsas S.A.",
+            "issue_date": "2026-04-10",
+            "total_amount_cents": 13000,
+            "status": "processed",
+            "line_items": [
+                {
+                    "line_id": "line_1",
+                    "raw_text": "TEQUEÑOS DE QUESO CAJA 50U",
+                    "quantity": 2,
+                    "unit_price_cents": 2500,
+                    "mapped_ingredient_id": "ing_tequeno_01",
+                },
+                {
+                    "line_id": "line_2",
+                    "raw_text": "SALSA DE AJO 5L",
+                    "quantity": 1,
+                    "unit_price_cents": 8000,
+                    "mapped_ingredient_id": "ing_salsa_ajo_01",
+                },
+            ],
+        },
         # ── Laura ───────────────────────────────────────────
         {
             "invoice_id": "inv_40011",
@@ -284,16 +309,16 @@ mock_database: dict = {
         },
 
         # ── Carlos (rest_310) ───────────────────────────────
-        {
-            "ingredient_id": "ing_cerveza_01",
-            "restaurant_id": "rest_310",
-            "name": "Cerveza Artesana Premium",
-            "category": "food",  # ← BUG: should be "beverage"
-            "purchase_unit": "Units",
-            "recipe_unit": "Units",
-            "conversion_rate": 1,
-            "average_cost_per_recipe_unit_cents": 250.0,
-        },
+        # {
+        #     "ingredient_id": "ing_cerveza_01",
+        #     "restaurant_id": "rest_310",
+        #     "name": "Cerveza Artesana Premium",
+        #     "category": "food",  # ← BUG: should be "beverage"
+        #     "purchase_unit": "Units",
+        #     "recipe_unit": "Units",
+        #     "conversion_rate": 1,
+        #     "average_cost_per_recipe_unit_cents": 250.0,
+        # },
         {
             "ingredient_id": "ing_truffle_oil_01",
             "restaurant_id": "rest_310",
@@ -323,6 +348,26 @@ mock_database: dict = {
             "recipe_unit": "Units",
             "conversion_rate": 1,
             "average_cost_per_recipe_unit_cents": 35.0,
+        },
+        {
+            "ingredient_id": "ing_tequeno_01",
+            "restaurant_id": "rest_310",
+            "name": "Tequeños de Queso",
+            "category": "food",
+            "purchase_unit": "Units",
+            "recipe_unit": "Units",
+            "conversion_rate": 1,
+            "average_cost_per_recipe_unit_cents": 50.0,
+        },
+        {
+            "ingredient_id": "ing_salsa_ajo_01",
+            "restaurant_id": "rest_310",
+            "name": "Salsa de Ajo",
+            "category": "food",
+            "purchase_unit": "Liters",
+            "recipe_unit": "Milliliters",
+            "conversion_rate": 1000,
+            "average_cost_per_recipe_unit_cents": 1.6,
         },
 
         # ── Laura (rest_400) ────────────────────────────────
@@ -380,6 +425,17 @@ mock_database: dict = {
                 {"ingredient_id": "ing_carne_smash_01", "quantity": 150, "unit": "Grams"},
                 {"ingredient_id": "ing_pan_brioche_01", "quantity": 1, "unit": "Units"},
                 {"ingredient_id": "ing_truffle_oil_01", "quantity": 500, "unit": "Milliliters"},  # ← BUG: should be 5 mL
+            ],
+        },
+        {
+            "recipe_id": "rec_tequeno_01",
+            "restaurant_id": "rest_310",
+            "name": "Ración de Tequeños",
+            "sale_price_cents": 850,
+            "current_cost_cents": 348,
+            "ingredients_used": [
+                {"ingredient_id": "ing_tequeno_01", "quantity": 6, "unit": "Units"},
+                {"ingredient_id": "ing_salsa_ajo_01", "quantity": 30, "unit": "Milliliters"},
             ],
         },
 

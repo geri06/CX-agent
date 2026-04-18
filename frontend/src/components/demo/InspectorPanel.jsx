@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Brain, Wrench, Eye, ChevronDown } from 'lucide-react';
+import { Terminal, Brain, Wrench, Eye, ChevronDown, Inbox, Filter, Search } from 'lucide-react';
 import TypewriterText from './TypewriterText';
 
 /**
@@ -89,6 +89,44 @@ function extractReasoningContent(step) {
   if (!step?.output) return null;
   const { output } = step;
 
+  // ── Query Received (__start__): format the input fields
+  if (step.nodeId === '__start__') {
+    const parts = [];
+    if (output.user_name) parts.push(`👤  Customer: ${output.user_name}`);
+    if (output.user_email) parts.push(`📧  Email: ${output.user_email}`);
+    if (output.user_query) parts.push(`\n💬  Query:\n${output.user_query}`);
+    if (output.thread_id) parts.push(`\n🧵  Thread: ${output.thread_id}`);
+    return parts.length > 0 ? parts.join('\n') : null;
+  }
+
+  // ── Router classification
+  if (step.nodeId === 'router_node' && output.category) {
+    const levelLabels = {
+      'level_1': 'Level 1 — FAQ / Self-serve',
+      'level_2': 'Level 2 — Data Audit / Investigation',
+      'level_3': 'Level 3 — Out-of-scope / Escalation',
+    };
+    const label = levelLabels[output.category] || output.category;
+    return `📋  Classification: ${label}`;
+  }
+
+  // ── Knowledge Retrieval node: extract retrieved_context string
+  if (step.nodeId === 'retrieve_node' && output.retrieved_context) {
+    return output.retrieved_context;
+  }
+
+  // ── Tool executor nodes: extract message content
+  if (step.nodeId === 'tool_executor_node' && output.messages && Array.isArray(output.messages)) {
+    const contents = [];
+    for (const msg of output.messages) {
+      const text = msg.content || msg.kwargs?.content;
+      if (text && typeof text === 'string' && text.trim().length > 0) {
+        contents.push(text);
+      }
+    }
+    if (contents.length > 0) return contents.join('\n\n---\n\n');
+  }
+
   // Show draft email on Agent Complete or Awaiting Human Review
   if ((step.nodeId === '__end__' || step.nodeId === '__interrupt__') && output.draft_email) {
     return output.draft_email;
@@ -174,9 +212,8 @@ export default function InspectorPanel({ activeStep, isRunning }) {
             Inspector
           </h2>
           {activeStep && (
-            <span className={`badge text-[9px] ${
-              isReasonerType ? 'badge-accent' : isToolType ? 'badge-blue' : 'badge-neutral'
-            }`}>
+            <span className={`badge text-[9px] ${isReasonerType ? 'badge-accent' : isToolType ? 'badge-blue' : 'badge-neutral'
+              }`}>
               {activeStep.type}
             </span>
           )}
@@ -229,25 +266,64 @@ export default function InspectorPanel({ activeStep, isRunning }) {
               transition={{ duration: 0.2 }}
               ref={contentRef}
             >
-              {/* Formatted content: reasoning, draft email, or human review */}
-              {(isReasonerType || activeStep.nodeId === '__end__' || activeStep.nodeId === '__interrupt__' || activeStep.nodeId === '__resume__') && reasoningContent && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Brain size={14} className="text-[var(--color-accent-hover)]" />
-                    <span className="text-[11px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">
-                      {activeStep.nodeId === 'extract_findings_node' ? 'Investigation Findings' :
-                       activeStep.nodeId === 'l2_draft_node' ? 'Draft Email' :
-                       activeStep.nodeId === '__end__' ? 'Final Draft Email' :
-                       activeStep.nodeId === '__interrupt__' ? 'Drafted Email — Awaiting Review' :
-                       activeStep.nodeId === '__resume__' ? 'Human Feedback' :
-                       'Reasoning'}
-                    </span>
+              {/* Formatted content: reasoning, draft email, human review, input, classification, retrieved content */}
+              {(() => {
+                // Determine which nodes should show formatted content
+                const showFormatted = (
+                  isReasonerType ||
+                  activeStep.nodeId === '__start__' ||
+                  activeStep.nodeId === '__end__' ||
+                  activeStep.nodeId === '__interrupt__' ||
+                  activeStep.nodeId === '__resume__' ||
+                  activeStep.nodeId === 'router_node' ||
+                  activeStep.nodeId === 'tool_executor_node' ||
+                  activeStep.nodeId === 'retrieve_node'
+                );
+
+                if (!showFormatted || !reasoningContent) return null;
+
+                // Choose icon based on node type
+                const iconMap = {
+                  '__start__': Inbox,
+                  'router_node': Filter,
+                  'tool_executor_node': Search,
+                  'retrieve_node': Search,
+                };
+                const IconComponent = iconMap[activeStep.nodeId] || Brain;
+                const iconColor = activeStep.nodeId === '__start__' ? 'text-[var(--color-blue)]' :
+                  activeStep.nodeId === 'router_node' ? 'text-[var(--color-accent)]' :
+                    (activeStep.nodeId === 'tool_executor_node' || activeStep.nodeId === 'retrieve_node') ? 'text-[var(--color-blue)]' :
+                      'text-[var(--color-accent-hover)]';
+
+                // Choose title based on node type
+                const titleMap = {
+                  '__start__': 'Input',
+                  'router_node': 'Classification',
+                  'tool_executor_node': 'Retrieved Content',
+                  'retrieve_node': 'Retrieved Content',
+                  'extract_findings_node': 'Investigation Findings',
+                  'l2_draft_node': 'Draft Email',
+                  'draft_node': 'Draft Email',
+                  '__end__': 'Final Draft Email',
+                  '__interrupt__': 'Drafted Email — Awaiting Review',
+                  '__resume__': 'Human Feedback',
+                };
+                const title = titleMap[activeStep.nodeId] || 'Reasoning';
+
+                return (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <IconComponent size={14} className={iconColor} />
+                      <span className="text-[11px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">
+                        {title}
+                      </span>
+                    </div>
+                    <div className="code-block text-[var(--color-text-primary)] whitespace-pre-wrap">
+                      <TypewriterText text={reasoningContent} speed={2} />
+                    </div>
                   </div>
-                  <div className="code-block text-[var(--color-text-primary)] whitespace-pre-wrap">
-                    <TypewriterText text={reasoningContent} speed={2} />
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Tool calls display */}
               {toolCalls && (
